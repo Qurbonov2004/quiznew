@@ -23,21 +23,29 @@ def create_result(id):
 def quiz_detail(request, code):
     quiz = models.Quiz.objects.get(code=code)
     quiz_taker = models.QuizTaker.objects.filter(quiz=quiz).first()
-    result = models.Result.objects.filter(taker=quiz_taker)
+    
+    # Check if quiz_taker is None before using it
+    if not quiz_taker:
+        return HttpResponse("Quiz taker not found")
+    
+    result = models.Result.objects.filter(taker=quiz_taker).first()
     questions = models.Question.objects.filter(
-        quiz = quiz
+        quiz=quiz
     )
     now = timezone.now()
+    
     if quiz.start_time and now < quiz.start_time:
         return HttpResponse("Quiz hali boshlanmagan")
     elif quiz.end_time and now > quiz.end_time:
         return HttpResponse("Quiz tugagan")
+    
     context = {
-        'quiz':quiz,
-        'questions':questions,
-        'result':result
+        'quiz': quiz,
+        'questions': questions,
+        'result': result
     }
     return render(request, 'front/quiz-detail.html', context)
+
 
 
 def create_answers(request, code):
@@ -59,4 +67,4 @@ def create_answers(request, code):
                 answer_id=int(value)
             )
     create_result(quiz_taker.id)
-    return HttpResponse('Javobingiz yozildi')
+    return redirect('dash:result_detail', id=quiz_taker.id)

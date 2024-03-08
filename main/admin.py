@@ -1,8 +1,23 @@
 from django.contrib import admin
 from .models import *
-# Register your models here.
+from ckeditor.widgets import CKEditorWidget
+from django import forms
+from django.contrib import admin
+from .models import Quiz
 
-admin.site.register(Quiz)
+class MyModelAdminForm(forms.ModelForm):
+    class Meta:
+        model = Quiz
+        fields = '__all__'
+        widgets = {
+            'content': CKEditorWidget(),
+        }
+
+class MyModelAdmin(admin.ModelAdmin):
+    form = MyModelAdminForm
+
+admin.site.register(Quiz, MyModelAdmin)
+
 admin.site.register(Question)
 admin.site.register(Option)
 admin.site.register(QuizTaker)
